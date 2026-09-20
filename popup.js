@@ -4,7 +4,7 @@ const status = document.querySelector("#status");
 function render(enabled) {
   checkbox.checked = enabled;
   status.textContent = enabled
-    ? "On — music pauses for YouTube videos"
+    ? "On — music pauses for videos on any site"
     : "Off — music will not be controlled";
 }
 

@@ -1,6 +1,6 @@
 const state = {
   enabled: false,
-  playingYouTubeTabs: new Set(),
+  playingVideoTabs: new Set(),
   pausedMusicTabs: new Set()
 };
 
@@ -14,11 +14,11 @@ const ready = new Promise((resolve) => {
 async function loadState() {
   const [local, session] = await Promise.all([
     chrome.storage.local.get({ enabled: false }),
-    chrome.storage.session.get({ playingYouTubeTabs: [], pausedMusicTabs: [] })
+    chrome.storage.session.get({ playingVideoTabs: [], pausedMusicTabs: [] })
   ]);
 
   state.enabled = local.enabled === true;
-  state.playingYouTubeTabs = new Set(session.playingYouTubeTabs);
+  state.playingVideoTabs = new Set(session.playingVideoTabs);
   state.pausedMusicTabs = new Set(session.pausedMusicTabs);
   await updateBadge();
   readyResolve();
@@ -36,7 +36,7 @@ async function waitUntilReady() {
 
 async function saveSessionState() {
   await chrome.storage.session.set({
-    playingYouTubeTabs: [...state.playingYouTubeTabs],
+    playingVideoTabs: [...state.playingVideoTabs],
     pausedMusicTabs: [...state.pausedMusicTabs]
   });
 }
@@ -78,7 +78,7 @@ async function pausePlayingMusic() {
 async function resumePausedMusic() {
   await pausePromise;
 
-  if (state.playingYouTubeTabs.size !== 0) return;
+  if (state.playingVideoTabs.size !== 0) return;
 
   const tabsToResume = [...state.pausedMusicTabs];
   const results = await Promise.all(tabsToResume.map((tabId) => (
@@ -108,7 +108,7 @@ async function setEnabled(enabled) {
   if (!state.enabled) {
     clearTimeout(resumeTimer);
     await resumePausedMusic();
-    state.playingYouTubeTabs.clear();
+    state.playingVideoTabs.clear();
     state.pausedMusicTabs.clear();
     await saveSessionState();
     return;
@@ -116,9 +116,9 @@ async function setEnabled(enabled) {
 
   await saveSessionState();
 
-  // Pick up a video that was already playing when the user enabled us.
-  const youtubeTabs = await chrome.tabs.query({ url: "https://www.youtube.com/*" });
-  await Promise.all(youtubeTabs.map((tab) => {
+  // Pick up videos that were already playing when the user enabled us.
+  const tabs = await chrome.tabs.query({});
+  await Promise.all(tabs.map((tab) => {
     if (typeof tab.id !== "number") return undefined;
     return sendToTab(tab.id, { type: "CHECK_VIDEO" });
   }));
@@ -148,7 +148,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender) => {
-  if (message?.type !== "YOUTUBE_PLAYING" || typeof sender.tab?.id !== "number") {
+  if (message?.type !== "VIDEO_PLAYING" || typeof sender.tab?.id !== "number") {
     return;
   }
 
@@ -160,8 +160,8 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     const isPlaying = message.playing === true;
 
     if (isPlaying) {
-      const wasEmpty = state.playingYouTubeTabs.size === 0;
-      state.playingYouTubeTabs.add(tabId);
+      const wasEmpty = state.playingVideoTabs.size === 0;
+      state.playingVideoTabs.add(tabId);
       clearTimeout(resumeTimer);
 
       if (wasEmpty) {
@@ -170,9 +170,9 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         });
         await pausePromise;
       }
-    } else if (state.playingYouTubeTabs.delete(tabId)) {
+    } else if (state.playingVideoTabs.delete(tabId)) {
       await saveSessionState();
-      if (state.playingYouTubeTabs.size === 0) scheduleResume();
+      if (state.playingVideoTabs.size === 0) scheduleResume();
     }
 
     await saveSessionState();
@@ -182,10 +182,10 @@ chrome.runtime.onMessage.addListener((message, sender) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   (async () => {
     await waitUntilReady();
-    const wasPlaying = state.playingYouTubeTabs.delete(tabId);
+    const wasPlaying = state.playingVideoTabs.delete(tabId);
     state.pausedMusicTabs.delete(tabId);
     await saveSessionState();
-    if (wasPlaying && state.playingYouTubeTabs.size === 0) scheduleResume();
+    if (wasPlaying && state.playingVideoTabs.size === 0) scheduleResume();
   })().catch((error) => console.error("Could not process closed tab", error));
 });
 
@@ -196,14 +196,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 
   (async () => {
     await waitUntilReady();
-    const leftYouTube = !changeInfo.url.startsWith("https://www.youtube.com/");
     const leftMusic = !changeInfo.url.startsWith("https://music.youtube.com/");
-    const removedVideo = leftYouTube && state.playingYouTubeTabs.delete(tabId);
+    const removedVideo = state.playingVideoTabs.delete(tabId);
     const removedMusic = leftMusic && state.pausedMusicTabs.delete(tabId);
 
     if (removedVideo || removedMusic) {
       await saveSessionState();
-      if (removedVideo && state.playingYouTubeTabs.size === 0) scheduleResume();
+      if (removedVideo && state.playingVideoTabs.size === 0) scheduleResume();
     }
   })().catch((error) => console.error("Could not process navigation", error));
 });

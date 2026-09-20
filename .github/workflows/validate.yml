@@ -19,6 +19,6 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
-          for file in background.js youtube-content.js music-content.js popup.js; do
+          for file in background.js video-content.js music-content.js popup.js; do
             node --check "$file"
           done
