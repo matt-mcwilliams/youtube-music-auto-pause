@@ -3,6 +3,12 @@
   "name": "YouTube Music Auto-Pause",
   "version": "1.0.0",
   "description": "Pause YouTube Music while a YouTube video plays.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.youtube.com/*",
@@ -13,6 +19,11 @@
   },
   "action": {
     "default_title": "YouTube Music Auto-Pause",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    },
     "default_popup": "popup.html"
   },
   "content_scripts": [
