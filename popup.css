@@ -1,0 +1,43 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 280px;
+  margin: 0;
+  color: #202124;
+  font: 14px system-ui, sans-serif;
+}
+
+main {
+  padding: 16px;
+}
+
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+strong,
+small {
+  display: block;
+}
+
+strong {
+  font-size: 14px;
+}
+
+small {
+  margin-top: 5px;
+  color: #5f6368;
+  line-height: 1.3;
+}
+
+input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}

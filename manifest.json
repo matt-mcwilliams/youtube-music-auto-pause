@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Music Auto-Pause",
+  "version": "1.0.0",
+  "description": "Pause YouTube Music while a YouTube video plays.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://music.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "YouTube Music Auto-Pause",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["youtube-content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://music.youtube.com/*"],
+      "js": ["music-content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
