@@ -1,4 +1,4 @@
-let videos = new Set();
+const videos = new Set();
 let lastPlaying = null;
 
 function report(force = false) {
@@ -58,3 +58,11 @@ chrome.runtime.onMessage.addListener((message) => {
   syncVideos();
   report(true);
 });
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "local" || changes.enabled?.newValue !== true) return;
+  syncVideos();
+  report(true);
+});
+
+window.addEventListener("pagehide", () => report(true));

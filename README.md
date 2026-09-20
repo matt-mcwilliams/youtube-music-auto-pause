@@ -6,7 +6,7 @@ It is off by default and can be enabled or disabled from the toolbar popup.
 
 ## Features
 
-- Supports HTML5 videos on any website.
+- Supports HTML5 videos on any website, including embedded frames.
 - Handles multiple tabs and multiple videos on the same page.
 - Resumes only music that the extension paused itself.
 - Treats pause, end, tab close, and navigation away as stopping the video.
@@ -42,7 +42,7 @@ The extension requests `storage` and access to all websites so it can detect HTM
 
 Chromium may block an automatic resume when its autoplay policy requires a user gesture. The extension tries YouTube Music's own play control as a fallback; if that is also blocked, click play once in YouTube Music and continue using the extension.
 
-Videos inside cross-origin iframes, browser-internal pages, and browsers other than Chromium-based desktop browsers may be out of scope. The extension only controls YouTube Music; it does not pause other music services.
+Browser-internal pages and browsers other than Chromium-based desktop browsers may be out of scope. The extension only controls YouTube Music; it does not pause other music services.
 
 ## Development checks
 
